@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FitFlow — AI 맞춤 운동 습관 형성 서비스 기획안</title>
+  <style>
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary:   #4F46E5;
+      --secondary: #06B6D4;
+      --accent:    #10B981;
+      --warn:      #F59E0B;
+      --dark:      #0F172A;
+      --mid:       #334155;
+      --muted:     #64748B;
+      --light:     #F1F5F9;
+      --white:     #FFFFFF;
+      --radius:    14px;
+      --shadow:    0 4px 24px rgba(0,0,0,.10);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;
+      background: var(--light);
+      color: var(--dark);
+      line-height: 1.7;
+    }
+    a { color: var(--primary); text-decoration: none; }
+    img { max-width: 100%; display: block; }
+
+    /* ===== UTILITY ===== */
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+    .tag {
+      display: inline-block;
+      padding: 4px 14px;
+      border-radius: 999px;
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+    }
+    .tag-blue   { background:#EEF2FF; color: var(--primary); }
+    .tag-cyan   { background:#ECFEFF; color: var(--secondary); }
+    .tag-green  { background:#ECFDF5; color: var(--accent); }
+    .tag-amber  { background:#FFFBEB; color: var(--warn); }
+    .section-label {
+      font-size: .85rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin-bottom: 10px;
+    }
+    .section-title {
+      font-size: clamp(1.6rem, 3vw, 2.4rem);
+      font-weight: 800;
+      color: var(--dark);
+      margin-bottom: 14px;
+    }
+    .section-sub {
+      font-size: 1.05rem;
+      color: var(--muted);
+      max-width: 640px;
+    }
+    .card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 28px;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,.13); }
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 22px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 22px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 18px; }
+    section { padding: 80px 0; }
+    section:nth-child(even) { background: var(--white); }
+
+    /* ===== NAV ===== */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,.92);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid #E2E8F0;
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+    }
+    .nav-logo { font-size: 1.3rem; font-weight: 900; color: var(--primary); }
+    .nav-logo span { color: var(--secondary); }
+    .nav-links { display: flex; gap: 22px; list-style: none; }
+    .nav-links a { font-size: .9rem; font-weight: 600; color: var(--mid); }
+    .nav-links a:hover { color: var(--primary); }
+    @media(max-width:640px){ .nav-links { display: none; } }
+
+    /* ===== HERO ===== */
+    .hero {
+      background: linear-gradient(135deg, #0F172A 0%, #1E1B4B 50%, #0E7490 100%);
+      color: var(--white);
+      padding: 100px 0 80px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      width: 700px; height: 700px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(99,102,241,.25) 0%, transparent 70%);
+      top: -200px; right: -200px;
+    }
+    .hero-badge { margin-bottom: 20px; }
+    .hero h1 {
+      font-size: clamp(2.2rem, 5vw, 3.6rem);
+      font-weight: 900;
+      line-height: 1.2;
+      margin-bottom: 20px;
+    }
+    .hero h1 em { color: #67E8F9; font-style: normal; }
+    .hero p {
+      font-size: 1.15rem;
+      color: rgba(255,255,255,.75);
+      max-width: 600px;
+      margin-bottom: 36px;
+    }
+    .hero-stats {
+      display: flex; gap: 36px; flex-wrap: wrap;
+    }
+    .hero-stat strong { font-size: 2rem; font-weight: 900; color: #67E8F9; display: block; }
+    .hero-stat span { font-size: .85rem; color: rgba(255,255,255,.6); }
+
+    /* ===== SLIDES NAV ===== */
+    .slides-nav {
+      background: var(--primary);
+      padding: 18px 0;
+    }
+    .slides-nav-inner {
+      display: flex; gap: 10px; flex-wrap: wrap;
+    }
+    .slide-btn {
+      padding: 6px 16px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.15);
+      color: var(--white);
+      font-size: .82rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: background .2s;
+    }
+    .slide-btn:hover { background: rgba(255,255,255,.35); }
+
+    /* ===== PPT SLIDE SECTION ===== */
+    .slide-section {
+      background: #1E293B;
+      padding: 60px 0;
+    }
+    .slide-title-row {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+    .slide-title-row h2 {
+      font-size: 1rem;
+      color: #94A3B8;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .slide-title-row h3 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--white);
+    }
+    .ppt-slide {
+      background: #0F172A;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 40px 48px;
+      color: var(--white);
+      min-height: 340px;
+      display: none;
+    }
+    .ppt-slide.active { display: block; }
+    .ppt-slide h2 {
+      font-size: 1.7rem;
+      font-weight: 800;
+      margin-bottom: 24px;
+      color: #67E8F9;
+      border-bottom: 2px solid #334155;
+      padding-bottom: 12px;
+    }
+    .ppt-slide ul { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+    .ppt-slide ul li {
+      display: flex; align-items: flex-start; gap: 12px;
+      font-size: 1rem; line-height: 1.5; color: #CBD5E1;
+    }
+    .ppt-slide ul li::before {
+      content: '▸';
+      color: var(--secondary);
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .ppt-slide .slide-highlight {
+      background: linear-gradient(135deg, #1E3A5F, #1a2e4a);
+      border-left: 4px solid var(--secondary);
+      border-radius: 8px;
+      padding: 16px 20px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #E2E8F0;
+      margin-bottom: 20px;
+    }
+    .ppt-slide .slide-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .ppt-slide .slide-card {
+      background: #1E293B;
+      border-radius: 10px;
+      padding: 16px;
+      border: 1px solid #334155;
+    }
+    .ppt-slide .slide-card h4 { color: #67E8F9; font-size: .9rem; margin-bottom: 6px; }
+    .ppt-slide .slide-card p { color: #94A3B8; font-size: .85rem; }
+    .slide-nav-btns {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: 24px;
+    }
+    .slide-nav-btns button {
+      padding: 10px 24px;
+      border-radius: 8px;
+      border: none;
+      background: var(--primary);
+      color: var(--white);
+      font-weight: 700;
+      cursor: pointer;
+      font-size: .9rem;
+    }
+    .slide-nav-btns button:disabled { background: #334155; cursor: not-allowed; }
+    .slide-nav-btns span { color: #94A3B8; font-size: .9rem; }
+
+    /* ===== OVERVIEW ===== */
+    .overview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: center; }
+    @media(max-width:768px){ .overview-grid { grid-template-columns: 1fr; } }
+    .overview-img {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border-radius: var(--radius);
+      height: 320px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 6rem;
+    }
+
+    /* ===== PROBLEM ===== */
+    .problem-card { border-left: 4px solid var(--warn); }
+    .problem-card .problem-num {
+      font-size: 2.5rem; font-weight: 900; color: var(--warn); line-height: 1;
+    }
+    .problem-card h3 { font-size: 1.1rem; font-weight: 700; margin: 8px 0 6px; }
+    .problem-card p { font-size: .92rem; color: var(--muted); }
+
+    /* ===== TARGET ===== */
+    .persona-card { border-top: 4px solid var(--primary); text-align: center; }
+    .persona-avatar {
+      width: 80px; height: 80px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.4rem; margin: 0 auto 14px;
+    }
+    .persona-card h3 { font-size: 1.05rem; font-weight: 800; margin-bottom: 8px; }
+    .persona-card p { font-size: .88rem; color: var(--muted); }
+
+    /* ===== CONCEPT ===== */
+    .concept-hero {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border-radius: var(--radius);
+      padding: 48px 36px;
+      color: var(--white);
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .concept-hero h3 { font-size: 1.8rem; font-weight: 900; margin-bottom: 12px; }
+    .concept-hero p { opacity: .85; max-width: 500px; margin: 0 auto; }
+
+    /* ===== FEATURES ===== */
+    .feature-icon {
+      width: 52px; height: 52px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem; margin-bottom: 16px;
+    }
+    .feature-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+    .feature-card p { font-size: .88rem; color: var(--muted); }
+
+    /* ===== AI TECH ===== */
+    .ai-flow {
+      display: flex; align-items: center; gap: 0; flex-wrap: wrap;
+      margin: 32px 0;
+    }
+    .ai-step {
+      flex: 1; min-width: 140px;
+      background: var(--white);
+      border-radius: 12px;
+      padding: 20px 16px;
+      text-align: center;
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+    .ai-step .step-num {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: var(--white);
+      font-size: .78rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 10px;
+    }
+    .ai-step h4 { font-size: .9rem; font-weight: 700; margin-bottom: 4px; }
+    .ai-step p { font-size: .78rem; color: var(--muted); }
+    .ai-arrow {
+      font-size: 1.4rem; color: var(--primary);
+      padding: 0 8px; flex-shrink: 0;
+    }
+    @media(max-width:640px){ .ai-arrow { display: none; } }
+
+    /* ===== IMPLEMENT ===== */
+    .stack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--white);
+      border: 1px solid #E2E8F0;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: .88rem;
+      font-weight: 600;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+    .stack-badge .dot {
+      width: 10px; height: 10px; border-radius: 50%;
+    }
+
+    /* ===== ROADMAP ===== */
+    .roadmap { display: flex; flex-direction: column; gap: 0; }
+    .rm-item { display: flex; gap: 20px; }
+    .rm-line {
+      display: flex; flex-direction: column; align-items: center;
+      flex-shrink: 0;
+    }
+    .rm-dot {
+      width: 20px; height: 20px; border-radius: 50%;
+      background: var(--primary); flex-shrink: 0;
+      box-shadow: 0 0 0 4px rgba(79,70,229,.2);
+    }
+    .rm-connector { flex: 1; width: 2px; background: #E2E8F0; }
+    .rm-item:last-child .rm-connector { display: none; }
+    .rm-content {
+      padding-bottom: 28px;
+    }
+    .rm-phase { font-size: .75rem; font-weight: 700; color: var(--primary); letter-spacing: 1px; text-transform: uppercase; }
+    .rm-title { font-size: 1rem; font-weight: 700; margin: 2px 0 4px; }
+    .rm-desc { font-size: .88rem; color: var(--muted); }
+
+    /* ===== CONTENT OPS ===== */
+    .ops-card { border-top: 4px solid var(--accent); }
+    .ops-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+    .ops-card p { font-size: .88rem; color: var(--muted); }
+
+    /* ===== EFFECT ===== */
+    .effect-stat {
+      text-align: center;
+    }
+    .effect-stat .num { font-size: 2.4rem; font-weight: 900; color: var(--primary); }
+    .effect-stat p { font-size: .88rem; color: var(--muted); }
+
+    /* ===== REVENUE ===== */
+    .revenue-card { border-left: 4px solid var(--accent); }
+    .revenue-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
+    .revenue-card p { font-size: .88rem; color: var(--muted); }
+
+    /* ===== EXPAND ===== */
+    .expand-card { background: linear-gradient(135deg, #F0FDF4, #ECFDF5); }
+    .expand-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 6px; color: var(--accent); }
+    .expand-card p { font-size: .88rem; color: var(--muted); }
+
+    /* ===== COMPETITOR ===== */
+    .comp-table {
+      width: 100%; border-collapse: collapse;
+      background: var(--white);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .comp-table th {
+      background: var(--primary); color: var(--white);
+      padding: 14px 18px; font-size: .88rem; text-align: left;
+    }
+    .comp-table td {
+      padding: 12px 18px; font-size: .88rem; border-bottom: 1px solid #F1F5F9;
+      color: var(--mid);
+    }
+    .comp-table tr:last-child td { border-bottom: none; }
+    .comp-table .ours { background: #EEF2FF; font-weight: 700; color: var(--primary); }
+    .check { color: var(--accent); font-weight: 700; }
+    .cross { color: #EF4444; }
+
+    /* ===== FOOTER ===== */
+    footer {
+      background: var(--dark);
+      color: rgba(255,255,255,.6);
+      text-align: center;
+      padding: 36px 24px;
+      font-size: .88rem;
+    }
+    footer strong { color: var(--white); }
+  </style>
+</head>
+<body>
+
+<!-- ===== NAV ===== -->
+<nav>
+  <div class="container">
+    <div class="nav-inner">
+      <div class="nav-logo">Fit<span>Flow</span></div>
+      <ul class="nav-links">
+        <li><a href="#overview">개요</a></li>
+        <li><a href="#problem">문제 정의</a></li>
+        <li><a href="#features">핵심 기능</a></li>
+        <li><a href="#ai">AI 기술</a></li>
+        <li><a href="#implement">구현 방법</a></li>
+        <li><a href="#roadmap">로드맵</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-badge">
+      <span class="tag tag-cyan">AI x 건강 x MZ세대</span>
+    </div>
+    <h1>
+      당신만의 AI 운동 코치,<br>
+      <em>FitFlow</em>
+    </h1>
+    <p>
+      ChatGPT API와 생성형 AI를 활용해 대학생 맞춤형 운동 루틴을 자동 생성하고,
+      일상 속 건강 습관 형성을 돕는 웹 서비스 기획안입니다.
+    </p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <strong>3개월</strong>
+        <span>1인 개발 목표</span>
+      </div>
+      <div class="hero-stat">
+        <strong>ChatGPT</strong>
+        <span>API 기반 AI 코칭</span>
+      </div>
+      <div class="hero-stat">
+        <strong>MZ세대</strong>
+        <span>타겟 사용자</span>
+      </div>
+      <div class="hero-stat">
+        <strong>무료</strong>
+        <span>Freemium 모델</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PPT 슬라이드 섹션 ===== -->
+<section class="slide-section" id="slides">
+  <div class="container">
+    <div class="slide-title-row">
+      <h2>PPT 발표자료</h2>
+      <h3>슬라이드 형식 기획안</h3>
+    </div>
+
+    <!-- 슬라이드 1: 표지 -->
+    <div class="ppt-slide active" id="slide-1">
+      <h2>표지 — FitFlow</h2>
+      <div class="slide-highlight">
+        "운동이 습관이 되는 순간, 삶이 달라진다 — AI와 함께라면 더 빠르게"
+      </div>
+      <ul>
+        <li><strong>프로젝트명:</strong> FitFlow — AI 맞춤 운동 습관 형성 서비스</li>
+        <li><strong>분류:</strong> AI 기반 헬스케어 웹 서비스</li>
+        <li><strong>타겟:</strong> 대학생 및 MZ세대 (18–34세)</li>
+        <li><strong>개발 형태:</strong> 1인 개발 / 3개월 이내 출시 목표</li>
+        <li><strong>핵심 기술:</strong> ChatGPT API · Bubble(노코드) · Google Sheets</li>
+      </ul>
+    </div>
+
+    <!-- 슬라이드 2: 프로젝트 개요 -->
+    <div class="ppt-slide" id="slide-2">
+      <h2>프로젝트 개요</h2>
+      <div class="slide-highlight">
+        FitFlow는 사용자 데이터를 기반으로 AI가 매주 맞춤 운동 루틴을 생성하고,
+        챌린지와 피드백으로 지속 가능한 운동 습관을 만드는 웹 서비스입니다.
+      </div>
+      <div class="slide-grid">
+        <div class="slide-card">
+          <h4>핵심 가치</h4>
+          <p>개인 맞춤 · 지속성 · 접근성</p>
+        </div>
+        <div class="slide-card">
+          <h4>기술 스택</h4>
+          <p>ChatGPT API + Bubble + Airtable</p>
+        </div>
+        <div class="slide-card">
+          <h4>수익 모델</h4>
+          <p>Freemium (월 9,900원 프리미엄)</p>
+        </div>
+        <div class="slide-card">
+          <h4>차별점</h4>
+          <p>전문 지식 없어도 즉시 시작 가능</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 슬라이드 3: 문제 정의 -->
+    <div class="ppt-slide" id="slide-3">
+      <h2>문제 정의</h2>
+      <div class="slide-highlight">
+        대학생의 72%는 '운동을 하고 싶지만 어떻게 시작해야 할지 모른다'고 응답합니다.
+      </div>
+      <ul>
+        <li>운동 정보 과잉 — YouTube·SNS의 콘텐츠 홍수로 인해 오히려 실행 장벽 증가</li>
+        <li>개인화 부재 — 체형·스케줄·목표가 각기 다른데 획일화된 루틴만 존재</li>
+        <li>지속성 실패 — 동기 부여 없이 혼자 운동을 유지하기 어려움</li>
+        <li>비용 문제 — 퍼스널 트레이닝 비용(월 30만~50만원)은 대학생에게 부담</li>
+      </ul>
+    </div>
+
+    <!-- 슬라이드 4: 타겟 사용자 -->
+    <div class="ppt-slide" id="slide-4">
+      <h2>타겟 사용자</h2>
+      <div class="slide-grid">
+        <div class="slide-card">
+          <h4>페르소나 A — 운동 입문자</h4>
+          <p>대학교 2학년 여성, 체중 관리가 목표. 헬스장 등록은 했지만 무엇을 해야 할지 몰라 포기한 경험 있음.</p>
+        </div>
+        <div class="slide-card">
+          <h4>페르소나 B — 바쁜 직장인</h4>
+          <p>25세 취업 준비생, 시간이 불규칙적. 집에서 할 수 있는 간단한 루틴이 필요함.</p>
+        </div>
+        <div class="slide-card">
+          <h4>페르소나 C — 운동 중급자</h4>
+          <p>대학원생 남성, 일정하게 운동하지만 프로그램화된 계획이 없어 성과가 정체됨.</p>
+        </div>
+      </div>
+      <ul style="margin-top:16px">
+        <li>공통 키워드: 바쁜 일정 · 낮은 예산 · 스마트폰 친화 · 빠른 결과 원함</li>
+      </ul>
+    </div>
+
+    <!-- 슬라이드 5: 서비스 컨셉 -->
+    <div class="ppt-slide" id="slide-5">
+      <h2>서비스 컨셉</h2>
+      <div class="slide-highlight">
+        "5분 입력 → AI 맞춤 루틴 생성 → 매일 챌린지 → AI 피드백"
+        — 이 사이클이 습관을 만든다.
+      </div>
+      <ul>
+        <li><strong>Input:</strong> 키·몸무게·목표·가용 시간·장비 여부 5가지 입력</li>
+        <li><strong>Generate:</strong> ChatGPT API가 주 5일치 운동 루틴 + 식단 팁 생성</li>
+        <li><strong>Challenge:</strong> 매일 완료 체크 & 스트릭(연속 달성) 시각화</li>
+        <li><strong>Feedback:</strong> 주간 운동 데이터를 AI가 분석해 다음 주 루틴 자동 조정</li>
+        <li><strong>Community:</strong> 같은 목표를 가진 사용자끼리 챌린지 공유</li>
+      </ul>
+    </div>
+
+    <!-- 슬라이드 6: 핵심 기능 -->
+    <div class="ppt-slide" id="slide-6">
+      <h2>핵심 기능 (1인 개발 기준)</h2>
+      <div class="slide-grid">
+        <div class="slide-card">
+          <h4>AI 루틴 생성기</h4>
+          <p>사용자 정보 입력 시 ChatGPT API가 맞춤 운동 플랜 자동 생성</p>
+        </div>
+        <div class="slide-card">
+          <h4>운동 체크리스트</h4>
+          <p>일별 운동 완료 체크, 스트릭 카운터, 주간 달성률 시각화</p>
+        </div>
+        <div class="slide-card">
+          <h4>AI 피드백 리포트</h4>
+          <p>주 1회 운동 기록 분석 후 AI가 격려 메시지 + 다음 주 루틴 제안</p>
+        </div>
+        <div class="slide-card">
+          <h4>운동 가이드 영상 링크</h4>
+          <p>각 운동 동작별 YouTube 공식 영상 자동 연결</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 슬라이드 7: AI 활용 방법 -->
+    <div class="ppt-slide" id="slide-7">
+      <h2>AI 기술 활용 방식</h2>
+      <div class="slide-highlight">
+        ChatGPT API(GPT-4o)를 핵심 엔진으로 활용 — 복잡한 ML 모델 없이도 개인화 달성
+      </div>
+      <ul>
+        <li><strong>루틴 생성:</strong> 사용자 정보를 System Prompt에 구조화 → GPT가 운동 플랜 JSON 반환</li>
+        <li><strong>피드백 생성:</strong> 주간 체크 데이터 → GPT가 격려 + 개선 포인트 자연어로 출력</li>
+        <li><strong>Q&A 챗봇:</strong> 운동 관련 질문에 GPT가 실시간 답변</li>
+        <li><strong>식단 팁 생성:</strong> 운동 목표에 맞는 간단한 식단 제안 (영양사 수준 X, 참고용)</li>
+        <li><strong>비용 관리:</strong> 토큰 캐싱 + 루틴 재사용으로 API 비용 월 $20 이하 유지</li>
+      </ul>
+    </div>
+
+    <!-- 슬라이드 8: 구현 방법 -->
+    <div class="ppt-slide" id="slide-8">
+      <h2>실제 구현 방법</h2>
+      <div class="slide-grid">
+        <div class="slide-card">
+          <h4>프론트엔드</h4>
+          <p>Bubble.io 노코드 플랫폼으로 UI/UX 구현. 커스텀 CSS로 디자인 보완.</p>
+        </div>
+        <div class="slide-card">
+          <h4>백엔드 / AI</h4>
+          <p>Bubble의 API Connector로 ChatGPT API 직접 연결. 서버 코드 불필요.</p>
+        </div>
+        <div class="slide-card">
+          <h4>데이터베이스</h4>
+          <p>Bubble 내장 DB + Airtable로 운동 기록·사용자 데이터 관리.</p>
+        </div>
+        <div class="slide-card">
+          <h4>인증 / 배포</h4>
+          <p>Bubble 내장 회원가입 시스템. 도메인 연결 후 즉시 배포 가능.</p>
+        </div>
+      </div>
+      <ul style="margin-top:16px">
+        <li>개발 비용 예상: Bubble 플랜 $29/월 + OpenAI API $20/월 = 약 7만원/월</li>
+      </ul>
+    </div>
+
+    <!-- 슬라이드 9: 콘텐츠 운영 전략 -->
+    <div class="ppt-slide" id="slide-9">
+      <h2>콘텐츠 운영 전략</h2>
+      <ul>
+        <li><strong>SNS 채널 운영:</strong> 인스타그램·틱톡에 "AI가 만든 오늘의 운동" 숏폼 콘텐츠 주 3회 업로드</li>
+        <li><strong>챌린지 마케팅:</strong> #30일FitFlow챌린지 해시태그로 사용자 참여 유도 및 바이럴 확산</li>
+        <li><strong>이메일 뉴스레터:</strong> 주간 운동 리포트를 메일로 발송해 재방문율 유지</li>
+        <li><strong>대학교 커뮤니티 제휴:</strong> 에브리타임·학교 커뮤니티 게시글로 초기 사용자 확보</li>
+        <li><strong>사용자 후기 UGC:</strong> 변화 전·후 사진 공유 기능으로 자발적 홍보 유도</li>
+      </ul>
+    </div>
+
+    <!-- 슬라이드 10: 기대 효과 -->
+    <div class="ppt-slide" id="slide-10">
+      <h2>기대 효과</h2>
+      <div class="slide-grid">
+        <div class="slide-card">
+          <h4>사용자 측면</h4>
+          <p>운동 시작 장벽 90% 제거. 전문가 없이도 체계적 운동 가능.</p>
+        </div>
+        <div class="slide-card">
+          <h4>지속성 향상</h4>
+          <p>스트릭 기능으로 운동 지속률 기존 대비 2~3배 향상 기대.</p>
+        </div>
+        <div class="slide-card">
+          <h4>비용 절감</h4>
+          <p>PT 비용 월 30만원 → 월 9,900원으로 97% 절감.</p>
+        </div>
+        <div class="slide-card">
+          <h4>서비스 측면</h4>
+          <p>출시 3개월 내 MAU 500명, 6개월 내 2,000명 목표.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 슬라이드 11: 확장 가능성 -->
+    <div class="ppt-slide" id="slide-11">
+      <h2>확장 가능성</h2>
+      <ul>
+        <li><strong>Phase 2 — 영양 관리 통합:</strong> 식단 기록 + AI 영양 분석 기능 추가</li>
+        <li><strong>Phase 3 — 웨어러블 연동:</strong> Apple Health·Samsung Health API 연동으로 실시간 데이터 수집</li>
+        <li><strong>Phase 4 — 소셜 기능:</strong> 친구 초대, 팀 챌린지, 운동 파트너 매칭</li>
+        <li><strong>Phase 5 — B2B 확장:</strong> 대학교 체육관·피트니스 센터에 화이트라벨 서비스 제공</li>
+        <li><strong>장기 비전:</strong> 누적 데이터 기반 자체 Fine-tuning 모델 개발로 AI 성능 고도화</li>
+      </ul>
+    </div>
+
+    <!-- 슬라이드 12: 결론 -->
+    <div class="ppt-slide" id="slide-12">
+      <h2>결론</h2>
+      <div class="slide-highlight">
+        FitFlow는 1인 개발자가 3개월 내 실현 가능한,
+        AI 기반 건강 습관 서비스입니다.
+      </div>
+      <ul>
+        <li>ChatGPT API + 노코드(Bubble)로 빠른 MVP 출시 가능</li>
+        <li>대학생의 현실적 고민(비용·시간·정보 과잉)을 정확히 해결</li>
+        <li>Freemium 모델로 초기 사용자 확보 후 수익화 전환 용이</li>
+        <li>SNS 챌린지 기반 바이럴 마케팅으로 저비용 성장 가능</li>
+        <li>헬스케어 → 라이프스타일 전반으로 확장 가능한 플랫폼 가치</li>
+      </ul>
+    </div>
+
+    <!-- 슬라이드 네비게이션 -->
+    <div class="slide-nav-btns">
+      <button id="prevBtn" onclick="changeSlide(-1)" disabled>이전</button>
+      <span id="slideCounter">1 / 12</span>
+      <button id="nextBtn" onclick="changeSlide(1)">다음</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION: 개요 ===== -->
+<section id="overview">
+  <div class="container">
+    <div class="overview-grid">
+      <div>
+        <p class="section-label">Project Overview</p>
+        <h2 class="section-title">FitFlow란 무엇인가?</h2>
+        <p class="section-sub">
+          FitFlow는 사용자의 신체 정보와 생활 패턴을 5분 만에 입력하면
+          ChatGPT API가 주간 맞춤 운동 루틴을 즉시 생성해주는 AI 건강 웹 서비스입니다.
+          전문 트레이너 없이도 체계적이고 지속 가능한 운동 습관을 만들 수 있습니다.
+        </p>
+        <br>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;">
+          <span class="tag tag-blue">AI 맞춤 루틴</span>
+          <span class="tag tag-cyan">노코드 개발</span>
+          <span class="tag tag-green">습관 형성</span>
+          <span class="tag tag-amber">Freemium</span>
+        </div>
+      </div>
+      <div class="overview-img">💪</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION: 문제 정의 ===== -->
+<section id="problem">
+  <div class="container">
+    <p class="section-label">Problem Definition</p>
+    <h2 class="section-title">왜 지금 FitFlow인가?</h2>
+    <p class="section-sub" style="margin-bottom:36px;">
+      대학생과 MZ세대가 운동을 포기하는 데는 명확한 구조적 이유가 있습니다.
+    </p>
+    <div class="grid-2">
+      <div class="card problem-card">
+        <div class="problem-num">01</div>
+        <h3>정보 과잉으로 인한 결정 마비</h3>
+        <p>유튜브·인스타의 운동 콘텐츠는 넘쳐나지만, 나에게 맞는 루틴을 고르는 것 자체가 어렵습니다. 결국 아무것도 시작하지 못합니다.</p>
+      </div>
+      <div class="card problem-card">
+        <div class="problem-num">02</div>
+        <h3>개인화된 운동 계획의 부재</h3>
+        <p>체형·목표·가용 시간이 모두 다른데, 대부분의 서비스는 일반적인 루틴만 제공합니다.</p>
+      </div>
+      <div class="card problem-card">
+        <div class="problem-num">03</div>
+        <h3>높은 PT 비용</h3>
+        <p>퍼스널 트레이닝 비용은 월 30~50만원 수준으로, 대학생에게 현실적이지 않습니다.</p>
+      </div>
+      <div class="card problem-card">
+        <div class="problem-num">04</div>
+        <h3>지속 동기 부여의 어려움</h3>
+        <p>혼자 운동을 지속하는 것은 어렵습니다. 피드백이 없으면 3주 이내에 대부분 포기합니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION: 타겟 사용자 ===== -->
+<section id="target">
+  <div class="container">
+    <p class="section-label">Target Users</p>
+    <h2 class="section-title">누구를 위한 서비스인가?</h2>
+    <p class="section-sub" style="margin-bottom:36px;">18~34세 대학생 및 MZ세대를 중심으로 3가지 핵심 페르소나를 설정했습니다.</p>
+    <div class="grid-3">
+      <div class="card persona-card">
+        <div class="persona-avatar" style="background:#EEF2FF;">🎓</div>
+        <h3>운동 입문 대학생</h3>
+        <p>20세 / 대학교 2학년<br>헬스장 등록했지만 어떻게 해야 할지 몰라 포기. 체중 감량이 목표.</p>
+        <br><span class="tag tag-blue">입문자</span>
+      </div>
+      <div class="card persona-card">
+        <div class="persona-avatar" style="background:#ECFEFF;">💼</div>
+        <h3>바쁜 취업 준비생</h3>
+        <p>25세 / 취준생<br>스케줄이 불규칙적. 집에서 15~30분 운동 루틴이 필요함.</p>
+        <br><span class="tag tag-cyan">중급자</span>
+      </div>
+      <div class="card persona-card">
+        <div class="persona-avatar" style="background:#ECFDF5;">🏋️</div>
+        <h3>체계가 필요한 운동러</h3>
+        <p>28세 / 직장 초년생<br>꾸준히 운동하지만 체계적 프로그램이 없어 성과 정체 중.</p>
+        <br><span class="tag tag-green">중급자+</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION: 서비스 컨셉 ===== -->
+<section id="concept">
+  <div class="container">
+    <p class="section-label">Service Concept</p>
+    <h2 class="section-title">서비스 컨셉</h2>
+    <div class="concept-hero">
+      <h3>5분 입력 → AI 루틴 생성 → 매일 챌린지 → 주간 AI 피드백</h3>
+      <p>이 단순한 사이클이 반복될수록 운동은 습관이 되고, 습관은 변화를 만듭니다.</p>
+    </div>
+    <div class="grid-4">
+      <div class="card" style="text-align:center;">
+        <div style="font-size:2rem;margin-bottom:10px;">📝</div>
+        <h3 style="font-size:.95rem;font-weight:700;margin-bottom:6px;">Step 1. 입력</h3>
+        <p style="font-size:.85rem;color:var(--muted);">신체 정보, 목표, 가용 시간, 장비 여부를 5분 내 입력</p>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div style="font-size:2rem;margin-bottom:10px;">🤖</div>
+        <h3 style="font-size:.95rem;font-weight:700;margin-bottom:6px;">Step 2. AI 생성</h3>
+        <p style="font-size:.85rem;color:var(--muted);">ChatGPT API가 주간 맞춤 운동 루틴 즉시 생성</p>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div style="font-size:2rem;margin-bottom:10px;">✅</div>
+        <h3 style="font-size:.95rem;font-weight:700;margin-bottom:6px;">Step 3. 실행</h3>
+        <p style="font-size:.85rem;color:var(--muted);">매일 운동 완료 체크 & 스트릭(연속 기록) 시각화</p>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div style="font-size:2rem;margin-bottom:10px;">📊</div>
+        <h3 style="font-size:.95rem;font-weight:700;margin-bottom:6px;">Step 4. 피드백</h3>
+        <p style="font-size:.85rem;color:var(--muted);">AI가 주간 기록 분석 후 다음 주 루틴 자동 조정</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION: 핵심 기능 ===== -->
+<section id="features">
+  <div class="container">
+    <p class="section-label">Core Features</p>
+    <h2 class="section-title">핵심 기능 (1인 개발 범위)</h2>
+    <p class="section-sub" style="margin-bottom:36px;">복잡한 기능은 배제하고, 핵심 가치만 빠르게 구현합니다.</p>
+    <div class="grid-3">
+      <div class="card feature-card">
+        <div class="feature-icon" style="background:#EEF2FF;">🤖</div>
+        <h3>AI 루틴 생성기</h3>
+        <p>사용자 정보 기반 ChatGPT API 호출로 주 5일 운동 루틴 자동 생성. 운동명·세트·횟수·휴식 시간 포함.</p>
+      </div>
+      <div class="card feature-card">
+        <div class="feature-icon" style="background:#ECFEFF;">✅</div>
+        <h3>운동 체크리스트</h3>
+        <p>일별 운동 완료 체크, 연속 달성(스트릭) 카운터, 주간·월간 달성률 시각화 대시보드.</p>
+      </div>
+      <div class="card feature-card">
+        <div class="feature-icon" style="background:#ECFDF5;">📊</div>
+        <h3>AI 주간 피드백</h3>
+        <p>운동 기록을 AI가 분석해 격려 메시지와 다음 주 루틴 개선 제안을 자연어로 제공.</p>
+      </div>
+      <div class="card feature-card">
+        <div class="feature-icon" style="background:#FFFBEB;">🎯</div>
+        <h3>목표 챌린지</h3>
+        <p>30일 챌린지 생성 기능. 목표 달성 시 배지(Badge) 지급으로 게임화(Gamification) 요소 추가.</p>
+      </div>
+      <div class="card feature-card">
+        <div class="feature-icon" style="background:#FDF4FF;">🎬</div>
+        <h3>운동 가이드 연결</h3>
+        <p>각 운동 동작명에 YouTube 공식 가이드 영상 자동 링크 연결로 올바른 자세 가이드 제공.</p>
+      </div>
+      <div class="card feature-card">
+        <div class="feature-icon" style="background:#FFF1F2;">💬</div>
+        <h3>AI 운동 Q&A</h3>
+        <p>운동 관련 궁금증을 AI 챗봇에게 실시간 질문. "어깨 통증이 있는데 어떤 운동 피해야 해?" 등.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION: AI 기술 ===== -->
+<section id="ai">
+  <div class="container">
+    <p class="section-label">AI Technology</p>
+    <h2 class="section-title">AI 기술 활용 방식</h2>
+    <p class="section-sub" style="margin-bottom:36px;">별도의 ML 모델 없이 ChatGPT API만으로 개인화 AI 코칭을 실현합니다.</p>
+
+    <div class="ai-flow">
+      <div class="ai-step">
+        <div class="step-num">1</div>
+        <h4>사용자 정보 수집</h4>
+        <p>키·몸무게·목표·시간·장비</p>
+      </div>
+      <div class="ai-arrow">→</div>
+      <div class="ai-step">
+        <div class="step-num">2</div>
+        <h4>프롬프트 구조화</h4>
+        <p>System Prompt에 정보 삽입</p>
+      </div>
+      <div class="ai-arrow">→</div>
+      <div class="ai-step">
+        <div class="step-num">3</div>
+        <h4>GPT-4o API 호출</h4>
+        <p>JSON 형식 루틴 반환</p>
+      </div>
+      <div class="ai-arrow">→</div>
+      <div class="ai-step">
+        <div class="step-num">4</div>
+        <h4>UI 렌더링</h4>
+        <p>Bubble에서 카드 형태 표시</p>
+      </div>
+      <div class="ai-arrow">→</div>
+      <div class="ai-step">
+        <div class="step-num">5</div>
+        <h4>기록 누적 후 재생성</h4>
+        <p>주간 데이터로 루틴 최적화</p>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:32px;">
+      <div class="card">
+        <h3 style="font-weight:700;margin-bottom:12px;">프롬프트 엔지니어링 예시</h3>
+        <div style="background:#F8FAFC;border-radius:8px;padding:16px;font-family:monospace;font-size:.82rem;color:#334155;line-height:1.8;border:1px solid #E2E8F0;">
+          System: 당신은 전문 개인 트레이너입니다.<br>
+          User 정보: {키: 170cm, 몸무게: 65kg,<br>
+          &nbsp;&nbsp;목표: 체중감량, 가용시간: 40분/일,<br>
+          &nbsp;&nbsp;장비: 덤벨, 운동경력: 3개월}<br><br>
+          주 5일 운동 플랜을 JSON 형식으로 반환하세요.<br>
+          각 운동에 세트수, 횟수, 휴식시간을 포함하세요.
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="font-weight:700;margin-bottom:12px;">비용 최적화 전략</h3>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:12px;">
+          <li style="display:flex;align-items:flex-start;gap:10px;font-size:.9rem;">
+            <span style="color:var(--accent);font-weight:700;">✓</span>
+            <span>루틴 생성은 주 1회만 수행해 토큰 비용 절감</span>
+          </li>
+          <li style="display:flex;align-items:flex-start;gap:10px;font-size:.9rem;">
+            <span style="color:var(--accent);font-weight:700;">✓</span>
+            <span>생성된 루틴 Airtable에 캐시하여 재호출 방지</span>
+          </li>
+          <li style="display:flex;align-items:flex-start;gap:10px;font-size:.9rem;">
+            <span style="color:var(--accent);font-weight:700;">✓</span>
+            <span>GPT-4o-mini 사용 시 비용 90% 절감 가능</span>
+          </li>
+          <li style="display:flex;align-items:flex-start;gap:10px;font-size:.9rem;">
+            <span style="color:var(--accent);font-weight:700;">✓</span>
+            <span>예상 월 API 비용: 사용자 100명 기준 약 $15</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION: 구현 방법 ===== -->
+<section id="implement">
+  <div class="container">
+    <p class="section-label">Implementation</p>
+    <h2 class="section-title">실제 구현 방법</h2>
+    <p class="section-sub" style="margin-bottom:36px;">노코드 툴 중심으로 코딩 최소화, 빠른 MVP 출시에 집중합니다.</p>
+
+    <div class="grid-2" style="margin-bottom:36px;">
+      <div class="card">
+        <h3 style="font-weight:700;margin-bottom:16px;">기술 스택</h3>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="stack-badge"><span class="dot" style="background:#7C3AED;"></span> Bubble.io — 프론트엔드 + 백엔드</div>
+          <div class="stack-badge"><span class="dot" style="background:#10A37F;"></span> OpenAI GPT-4o API — AI 루틴 생성</div>
+          <div class="stack-badge"><span class="dot" style="background:#FFBF00;"></span> Airtable — 운동 데이터베이스</div>
+          <div class="stack-badge"><span class="dot" style="background:#EA4335;"></span> Google Sheets — 분석 대시보드</div>
+          <div class="stack-badge"><span class="dot" style="background:#0078D7;"></span> Mailchimp — 이메일 리포트 발송</div>
+          <div class="stack-badge"><span class="dot" style="background:#FF5A5F;"></span> Figma — UI 디자인 시안</div>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="font-weight:700;margin-bottom:16px;">월 운영 비용 예상</h3>
+        <table style="width:100%;border-collapse:collapse;font-size:.9rem;">
+          <thead>
+            <tr style="background:var(--light);">
+              <th style="padding:10px;text-align:left;border-radius:6px 0 0 6px;">항목</th>
+              <th style="padding:10px;text-align:right;border-radius:0 6px 6px 0;">비용</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td style="padding:8px 10px;">Bubble.io Starter</td><td style="padding:8px 10px;text-align:right;">$29</td></tr>
+            <tr><td style="padding:8px 10px;">OpenAI API (GPT-4o-mini)</td><td style="padding:8px 10px;text-align:right;">~$15</td></tr>
+            <tr><td style="padding:8px 10px;">Airtable Free</td><td style="padding:8px 10px;text-align:right;">$0</td></tr>
+            <tr><td style="padding:8px 10px;">도메인</td><td style="padding:8px 10px;text-align:right;">~$1.5</td></tr>
+            <tr style="font-weight:700;border-top:2px solid var(--light);">
+              <td style="padding:10px;">합계</td>
+              <td style="padding:10px;text-align:right;color:var(--primary);">약 $45.5 (~6.5만원)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION: 로드맵 ===== -->
+<section id="roadmap">
+  <div class="container">
+    <p class="section-label">Development Roadmap</p>
+    <h2 class="section-title">1인 개발 3개월 로드맵</h2>
+    <p class="section-sub" style="margin-bottom:40px;">주차별 세부 목표를 설정해 체계적으로 개발합니다.</p>
+    <div class="roadmap">
+      <div class="rm-item">
+        <div class="rm-line"><div class="rm-dot"></div><div class="rm-connector"></div></div>
+        <div class="rm-content">
+          <div class="rm-phase">Month 1 — Week 1~2</div>
+          <div class="rm-title">기획 & 설계</div>
+          <div class="rm-desc">사용자 인터뷰 5명 진행 · 페르소나 확정 · Figma 와이어프레임 작성 · ChatGPT 프롬프트 초안 작성 및 테스트</div>
+        </div>
+      </div>
+      <div class="rm-item">
+        <div class="rm-line"><div class="rm-dot"></div><div class="rm-connector"></div></div>
+        <div class="rm-content">
+          <div class="rm-phase">Month 1 — Week 3~4</div>
+          <div class="rm-title">Bubble UI 구축</div>
+          <div class="rm-desc">회원가입·로그인 · 사용자 정보 입력 폼 · 루틴 표시 페이지 · 체크리스트 기본 기능 구현</div>
+        </div>
+      </div>
+      <div class="rm-item">
+        <div class="rm-line"><div class="rm-dot"></div><div class="rm-connector"></div></div>
+        <div class="rm-content">
+          <div class="rm-phase">Month 2 — Week 5~6</div>
+          <div class="rm-title">AI 기능 연동</div>
+          <div class="rm-desc">Bubble API Connector로 OpenAI 연결 · 루틴 생성 워크플로우 완성 · Airtable DB 설계 및 연동</div>
+        </div>
+      </div>
+      <div class="rm-item">
+        <div class="rm-line"><div class="rm-dot"></div><div class="rm-connector"></div></div>
+        <div class="rm-content">
+          <div class="rm-phase">Month 2 — Week 7~8</div>
+          <div class="rm-title">핵심 기능 완성</div>
+          <div class="rm-desc">스트릭 시스템 · 주간 AI 피드백 · 이메일 자동 발송 · 반응형 디자인 보완</div>
+        </div>
+      </div>
+      <div class="rm-item">
+        <div class="rm-line"><div class="rm-dot"></div><div class="rm-connector"></div></div>
+        <div class="rm-content">
+          <div class="rm-phase">Month 3 — Week 9~10</div>
+          <div class="rm-title">베타 테스트</div>
+          <div class="rm-desc">지인 20명 베타 테스트 · 버그 수정 · UX 개선 · 결제 시스템(Stripe) 연동 테스트</div>
+        </div>
+      </div>
+      <div class="rm-item">
+        <div class="rm-line"><div class="rm-dot"></div><div class="rm-connector"></div></div>
+        <div class="rm-content">
+          <div class="rm-phase">Month 3 — Week 11~12</div>
+          <div class="rm-title">정식 출시 & 마케팅</div>
+          <div class="rm-desc">도메인 연결 · 정식 오픈 · 에브리타임 홍보 · 인스타그램 채널 운영 시작 · 첫 100명 사용자 확보 목표</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION: 콘텐츠 운영 전략 ===== -->
+<section id="content-ops">
+  <div class="container">
+    <p class="section-label">Content Strategy</p>
+    <h2 class="section-title">콘텐츠 운영 전략</h2>
+    <p class="section-sub" style="margin-bottom:36px;">저비용 바이럴 마케팅으로 초기 사용자를 빠르게 확보합니다.</p>
+    <div class="grid-3">
+      <div class="card ops-card">
+        <h3>SNS 숏폼 콘텐츠</h3>
+        <p>인스타그램·틱톡에 "FitFlow가 만들어준 오늘의 운동" 릴스 주 3회 업로드. 실제 사용 화면 캡처 + 운동 결과 공유.</p>
+      </div>
+      <div class="card ops-card">
+        <h3>해시태그 챌린지</h3>
+        <p>#30일FitFlow챌린지 해시태그 캠페인. 사용자 인증 사진 리그램으로 UGC 자발적 생성 유도.</p>
+      </div>
+      <div class="card ops-card">
+        <h3>커뮤니티 홍보</h3>
+        <p>에브리타임·대학 커뮤니티에 "AI가 만들어준 운동 루틴 써봤어?" 체험 후기 형태 홍보글 게재.</p>
+      </div>
+      <div class="card ops-card">
+        <h3>주간 뉴스레터</h3>
+        <p>매주 월요일 운동 리포트 + 이번 주 루틴 요약 이메일 발송. 재방문율 및 리텐션 유지.</p>
+      </div>
+      <div class="card ops-card">
+        <h3>지인 추천 프로그램</h3>
+        <p>친구 1명 초대 시 프리미엄 1개월 무료 제공. 바이럴 루프(Viral Loop) 구조 설계.</p>
+      </div>
+      <div class="card ops-card">
+        <h3>협업 콘텐츠</h3>
+        <p>소규모 헬스 인플루언서(팔로워 1만~5만)와 무료 체험 리뷰 협업. 현금 대신 프리미엄 제공.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION: 기대 효과 ===== -->
+<section id="effects">
+  <div class="container">
+    <p class="section-label">Expected Outcomes</p>
+    <h2 class="section-title">기대 효과</h2>
+    <div class="grid-4" style="margin-bottom:36px;">
+      <div class="card effect-stat">
+        <div class="num">97%</div>
+        <p>PT 비용 대비<br>가격 절감율</p>
+      </div>
+      <div class="card effect-stat">
+        <div class="num">5분</div>
+        <p>루틴 생성에<br>걸리는 시간</p>
+      </div>
+      <div class="card effect-stat">
+        <div class="num">3배</div>
+        <p>스트릭 기능으로<br>운동 지속율 향상</p>
+      </div>
+      <div class="card effect-stat">
+        <div class="num">2,000</div>
+        <p>6개월 내 목표<br>MAU (월 활성 사용자)</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION: 경쟁 분석 ===== -->
+<section id="competitor">
+  <div class="container">
+    <p class="section-label">Competitive Analysis</p>
+    <h2 class="section-title">유사 서비스 및 차별화 전략</h2>
+    <p class="section-sub" style="margin-bottom:36px;">기존 서비스와의 핵심 차이점을 명확히 합니다.</p>
+    <div style="overflow-x:auto;margin-bottom:32px;">
+      <table class="comp-table">
+        <thead>
+          <tr>
+            <th>서비스</th>
+            <th>AI 맞춤 루틴</th>
+            <th>한국어 지원</th>
+            <th>무료 플랜</th>
+            <th>주간 피드백</th>
+            <th>가격 (월)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="ours">
+            <td>FitFlow (우리)</td>
+            <td class="check">GPT-4o</td>
+            <td class="check">완전 지원</td>
+            <td class="check">제공</td>
+            <td class="check">AI 자동</td>
+            <td>무료 / 9,900원</td>
+          </tr>
+          <tr>
+            <td>Nike Training Club</td>
+            <td class="cross">X (고정 루틴)</td>
+            <td class="check">지원</td>
+            <td class="check">제공</td>
+            <td class="cross">X</td>
+            <td>무료</td>
+          </tr>
+          <tr>
+            <td>Fitbod</td>
+            <td class="check">ML 기반</td>
+            <td class="cross">영어만</td>
+            <td class="cross">미제공</td>
+            <td class="cross">X</td>
+            <td>$12.99</td>
+          </tr>
+          <tr>
+            <td>유튜브 운동 채널</td>
+            <td class="cross">X</td>
+            <td class="check">지원</td>
+            <td class="check">무료</td>
+            <td class="cross">X</td>
+            <td>무료</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <h3 style="font-weight:700;margin-bottom:12px;">핵심 차별화 포인트</h3>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:10px;">
+          <li style="display:flex;gap:10px;font-size:.92rem;"><span style="color:var(--accent);font-weight:700;">01</span><span><strong>완전 한국어 AI 코칭</strong> — 한국 대학생 특화 표현·용어 사용</span></li>
+          <li style="display:flex;gap:10px;font-size:.92rem;"><span style="color:var(--accent);font-weight:700;">02</span><span><strong>주간 AI 피드백</strong> — 기록 분석 후 다음 주 루틴 자동 최적화</span></li>
+          <li style="display:flex;gap:10px;font-size:.92rem;"><span style="color:var(--accent);font-weight:700;">03</span><span><strong>진입 장벽 제로</strong> — 앱 설치 없는 웹 기반, 5분 만에 시작</span></li>
+          <li style="display:flex;gap:10px;font-size:.92rem;"><span style="color:var(--accent);font-weight:700;">04</span><span><strong>대학생 맞춤 가격</strong> — 월 9,900원의 합리적 프리미엄</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="font-weight:700;margin-bottom:12px;">수익 모델</h3>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div class="card revenue-card" style="padding:16px;">
+            <h3>Freemium 기본 플랜 (무료)</h3>
+            <p>월 2회 AI 루틴 생성 · 기본 체크리스트 · 운동 기록 30일 보관</p>
+          </div>
+          <div class="card revenue-card" style="padding:16px;border-left-color:var(--primary);">
+            <h3>Premium 플랜 (월 9,900원)</h3>
+            <p>무제한 루틴 생성 · 주간 AI 피드백 · AI 챗봇 · 기록 무제한 보관 · 식단 팁</p>
+          </div>
+          <div class="card revenue-card" style="padding:16px;border-left-color:var(--secondary);">
+            <h3>제휴 수익 (추후)</h3>
+            <p>운동 용품 제휴 링크 · 헬스장 제휴 할인 · 보충제 브랜드 협업</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION: 확장 가능성 ===== -->
+<section id="expand">
+  <div class="container">
+    <p class="section-label">Scalability</p>
+    <h2 class="section-title">확장 가능성</h2>
+    <p class="section-sub" style="margin-bottom:36px;">MVP 성공 이후 단계별로 서비스를 고도화합니다.</p>
+    <div class="grid-2">
+      <div class="card expand-card">
+        <h3>Phase 2 — 영양 관리 통합</h3>
+        <p>운동 목표에 맞는 AI 식단 추천 · 칼로리 계산기 · 식사 기록 기능 추가로 종합 건강 관리 서비스로 진화</p>
+      </div>
+      <div class="card expand-card">
+        <h3>Phase 3 — 웨어러블 연동</h3>
+        <p>Apple Health · Samsung Health · 갤럭시 워치 API 연동으로 실시간 심박수·활동량 데이터 기반 루틴 조정</p>
+      </div>
+      <div class="card expand-card">
+        <h3>Phase 4 — 소셜 & 커뮤니티</h3>
+        <p>친구 초대 · 팀 챌린지 · 운동 파트너 매칭 기능으로 소셜 네트워크 효과 극대화</p>
+      </div>
+      <div class="card expand-card">
+        <h3>Phase 5 — B2B 확장</h3>
+        <p>대학교 체육관·PT샵·기업 복지몰에 화이트라벨 서비스 제공. 안정적인 B2B 수익 확보</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <strong>FitFlow</strong> — AI 맞춤 운동 습관 형성 서비스<br>
+  <span style="margin-top:8px;display:block;">1인 개발 · 3개월 출시 목표 · ChatGPT API + Bubble.io 기반</span>
+</footer>
+
+<!-- ===== JAVASCRIPT ===== -->
+<script>
+  let currentSlide = 1;
+  const totalSlides = 12;
+
+  function changeSlide(direction) {
+    const oldSlide = document.getElementById('slide-' + currentSlide);
+    if (oldSlide) oldSlide.classList.remove('active');
+
+    currentSlide += direction;
+    if (currentSlide < 1) currentSlide = 1;
+    if (currentSlide > totalSlides) currentSlide = totalSlides;
+
+    const newSlide = document.getElementById('slide-' + currentSlide);
+    if (newSlide) newSlide.classList.add('active');
+
+    document.getElementById('slideCounter').textContent = currentSlide + ' / ' + totalSlides;
+    document.getElementById('prevBtn').disabled = currentSlide === 1;
+    document.getElementById('nextBtn').disabled = currentSlide === totalSlides;
+  }
+
+  // 키보드 방향키 지원
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') changeSlide(1);
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') changeSlide(-1);
+  });
+</script>
+
+</body>
+</html>
